@@ -1,9 +1,10 @@
-import { Repository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { Batch } from './batch.entity';
 import { JobType } from './enum/jobType.enum';
 import { JobStatus } from './enum/jobStatus.enum';
 import { Logger } from '@nestjs/common';
 
+// @EntityRepository(Batch)
 export class BatchRepository extends Repository<Batch> {
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
     try {
