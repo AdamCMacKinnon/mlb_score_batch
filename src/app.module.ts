@@ -17,7 +17,7 @@ import { DataModule } from './data/data.module';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       migrations: ['dist/migrations*.js'],
-      entities: ['dist/**/**/*.entity.js'],
+      entities: ['dist/**/*.entity.{js,ts}', 'src/**/*.entity.{ts,js}'],
       autoLoadEntities: true,
       migrationsRun: true,
       synchronize: false,
