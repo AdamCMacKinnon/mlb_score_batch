@@ -4,6 +4,7 @@ import { JobType } from './enum/jobType.enum';
 import { JobStatus } from './enum/jobStatus.enum';
 import { Logger } from '@nestjs/common';
 
+// @EntityRepository(Batch)
 export class BatchRepository extends Repository<Batch> {
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
     try {
