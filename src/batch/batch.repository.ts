@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Batch } from './batch.entity';
 import { JobType } from './enum/jobType.enum';
 import { JobStatus } from './enum/jobStatus.enum';

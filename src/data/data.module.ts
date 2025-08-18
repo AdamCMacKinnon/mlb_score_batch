@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BatchRepository } from '../batch/batch.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataService } from './data.service';
-import { DataRepository } from './data.repository';
 import { BatchService } from '../batch/batch.service';
+import { Batch } from '../batch/batch.entity';
+import { GameData } from './gameData.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BatchRepository, DataRepository])],
+  imports: [TypeOrmModule.forFeature([Batch, GameData])],
   controllers: [],
   providers: [DataService, BatchService],
 })

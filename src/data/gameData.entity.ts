@@ -6,9 +6,6 @@ export class GameData {
   game_pk: number;
 
   @Column()
-  week: number;
-
-  @Column()
   game_date: string;
 
   @Column()

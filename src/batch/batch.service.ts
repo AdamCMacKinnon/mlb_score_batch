@@ -1,19 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BatchRepository } from './batch.repository';
 import { JobType } from './enum/jobType.enum';
 import { format } from 'date-fns';
 import { JobStatus } from './enum/jobStatus.enum';
 import { DataService } from '../data/data.service';
+import { Batch } from './batch.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BatchService {
   constructor(
     private dataService: DataService,
     private schedulerRegistry: SchedulerRegistry,
-    @InjectRepository(BatchRepository)
-    private batchRepository: BatchRepository,
+    @InjectRepository(Batch)
+    private batchRepository: Repository<Batch>,
   ) {}
 
   // WRITE CRON JOBS HERE
@@ -32,10 +33,23 @@ export class BatchService {
       getData.start();
       const jobStatus =
         getScores.length <= 0 ? JobStatus.blank : JobStatus.success;
-      await this.batchRepository.batchJobData(jobType, jobStatus);
+      await this.batchJobData(jobType, jobStatus);
       Logger.log('Job Complete');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+    }
+  }
+
+  async batchJobData(jobType: JobType, jobStatus: JobStatus) {
+    try {
+      const batch = this.batchRepository.create({
+        job_type: jobType,
+        job_status: jobStatus,
+      });
+      await this.batchRepository.save(batch);
+      Logger.log(`${jobType} Completed, Saving Status ${jobStatus} to table`);
+    } catch (error) {
+      Logger.error(`ERROR INSERTING BATCH DATA: ${error}`);
     }
   }
 }

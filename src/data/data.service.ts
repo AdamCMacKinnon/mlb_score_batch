@@ -1,18 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BatchRepository } from '../batch/batch.repository';
 import { baseUrl, currentDayEndpoint } from '../utils/globals';
 import { JobStatus } from '../batch/enum/jobStatus.enum';
 import axios from 'axios';
-import { DataRepository } from './data.repository';
+import { Repository } from 'typeorm';
+import { Batch } from '../batch/batch.entity';
+import { GameData } from './gameData.entity';
 
 @Injectable()
 export class DataService {
   constructor(
-    @InjectRepository(BatchRepository)
-    private batchRepository: BatchRepository,
-    @InjectRepository(DataRepository)
-    private dataRepository: DataRepository,
+    @InjectRepository(Batch)
+    private batchRepository: Repository<Batch>,
+    @InjectRepository(GameData)
+    private dataRepository: Repository<GameData>,
   ) {}
 
   async getScores(date: any): Promise<string> {
