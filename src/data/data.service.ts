@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { baseUrl, currentDayEndpoint } from '../utils/globals';
+import {
+  baseUrl,
+  currentDayEndpoint,
+  fangraphsBaseUrl,
+} from '../utils/globals';
 import { JobStatus } from '../batch/enum/jobStatus.enum';
 import axios from 'axios';
 import { Repository } from 'typeorm';
@@ -15,6 +19,8 @@ export class DataService {
     @InjectRepository(GameData)
     private dataRepository: Repository<GameData>,
   ) {}
+
+  // Method gets scores and run differentials per game
 
   async getScores(date: any): Promise<string> {
     const url = `${baseUrl}/${currentDayEndpoint}&startDate=${date}&endDate=${date}`;
@@ -83,6 +89,23 @@ export class DataService {
       await this.dataRepository.save(game);
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
+    }
+  }
+
+  // Gets StuffPlus metrics per day for pitchers.  Uses Fangraphs API
+  async getFgPitcherMetrics(): Promise<any> {
+    const url = `${fangraphsBaseUrl}/leaders/major-league/data?age=&pos=all&stats=pit&lg=all&qual=30&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=0&sortcol=12&pageitems=20`;
+    try {
+      const response: any = await axios.get(url);
+      if (response.data.length < 1) {
+        Logger.warn('There are No Pitcher Stats today!');
+        return JobStatus.blank;
+      } else {
+        console.log(response.data);
+        return response;
+      }
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! IN DATA SERVICE: ${error}`);
     }
   }
 }

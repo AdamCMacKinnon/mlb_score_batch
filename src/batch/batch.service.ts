@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobType } from './enum/jobType.enum';
@@ -17,9 +18,13 @@ export class BatchService {
     private batchRepository: Repository<Batch>,
   ) {}
 
-  // WRITE CRON JOBS HERE
-  //   @Cron('*/5 * * * *', {
-  @Cron(CronExpression.EVERY_30_SECONDS, {
+  /**
+   * Cron expression variable for local testing.
+   * Use Cron string notation every 5 mins for production.
+   */
+
+  @Cron('*/5 * * * *', {
+    // @Cron(CronExpression.EVERY_30_SECONDS, {
     name: 'score_updates',
     timeZone: 'America/New_York',
   })
@@ -33,6 +38,27 @@ export class BatchService {
       getData.start();
       const jobStatus =
         getScores.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('Job Complete');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+    }
+  }
+
+  // @Cron(CronExpression.EVERY_10_SECONDS, {
+  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
+    name: 'daily_pitcher_stats',
+    timeZone: 'America/New_York',
+  })
+  async getDailyPitcherStats() {
+    Logger.log('Starting FG Pitcher Job');
+    try {
+      const jobType = JobType.daily_pitcher_stats;
+      const getStats = await this.dataService.getFgPitcherMetrics();
+      const getData = this.schedulerRegistry.getCronJob('daily_pitcher_stats');
+      getData.start();
+      const jobStatus =
+        getStats.length <= 0 ? JobStatus.blank : JobStatus.success;
       await this.batchJobData(jobType, jobStatus);
       Logger.log('Job Complete');
     } catch (error) {
