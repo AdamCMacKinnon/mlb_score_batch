@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { GameData } from './gameData.entity';
+import { GameData } from './Entities/gameData.entity';
 
 // @EntityRepository(GameData)
 export class DataRepository extends Repository<GameData> {

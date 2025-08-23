@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobType } from './enum/jobType.enum';
 import { format } from 'date-fns';
 import { JobStatus } from './enum/jobStatus.enum';
 import { DataService } from '../data/data.service';
-import { Batch } from './batch.entity';
+import { Batch } from './Entities/batch.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -17,9 +18,16 @@ export class BatchService {
     private batchRepository: Repository<Batch>,
   ) {}
 
-  // WRITE CRON JOBS HERE
-  //   @Cron('*/5 * * * *', {
-  @Cron(CronExpression.EVERY_30_SECONDS, {
+  /**
+   * BATCH SCHEDULE:
+   * Every 5 minutes = score_updates
+   * Daily, 4AM = fg_pitcher_update
+   * Daily, 5AM = fg_batter_update
+   * Daily, 6AM = daily_stuff_plus
+   */
+
+  @Cron('*/5 * * * *', {
+    // @Cron(CronExpression.EVERY_30_SECONDS, {
     name: 'score_updates',
     timeZone: 'America/New_York',
   })
@@ -33,6 +41,27 @@ export class BatchService {
       getData.start();
       const jobStatus =
         getScores.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('Job Complete');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+    }
+  }
+
+  // @Cron(CronExpression.EVERY_10_SECONDS, {
+  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
+    name: 'daily_stuff_plus',
+    timeZone: 'America/New_York',
+  })
+  async getDailyStuffPlus() {
+    Logger.log('Starting FG Pitcher Job');
+    try {
+      const jobType = JobType.daily_stuff_plus;
+      const getStats = await this.dataService.getDailyStuffPlus();
+      const getData = this.schedulerRegistry.getCronJob('daily_stuff_plus');
+      getData.start();
+      const jobStatus =
+        getStats.length <= 0 ? JobStatus.blank : JobStatus.success;
       await this.batchJobData(jobType, jobStatus);
       Logger.log('Job Complete');
     } catch (error) {
