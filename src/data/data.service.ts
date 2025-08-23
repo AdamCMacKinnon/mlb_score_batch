@@ -104,7 +104,6 @@ export class DataService {
       const response: any = await axios.get(url);
       const data = response.data.data;
       const date = format(new Date(), 'yyyy-LL-dd');
-      console.log(data);
       if (data.length < 1) {
         Logger.warn('There are No Pitcher Stats today!');
         return JobStatus.blank;
@@ -215,7 +214,6 @@ export class DataService {
         sp_location: sp_location,
         sp_pitching: sp_pitching,
       });
-      console.log(stuffPlus);
       await this.stuffPlusRepository.save(stuffPlus);
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
