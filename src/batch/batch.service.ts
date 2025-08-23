@@ -6,7 +6,7 @@ import { JobType } from './enum/jobType.enum';
 import { format } from 'date-fns';
 import { JobStatus } from './enum/jobStatus.enum';
 import { DataService } from '../data/data.service';
-import { Batch } from './batch.entity';
+import { Batch } from './Entities/batch.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -19,8 +19,11 @@ export class BatchService {
   ) {}
 
   /**
-   * Cron expression variable for local testing.
-   * Use Cron string notation every 5 mins for production.
+   * BATCH SCHEDULE:
+   * Every 5 minutes = score_updates
+   * Daily, 4AM = fg_pitcher_update
+   * Daily, 5AM = fg_batter_update
+   * Daily, 6AM = daily_stuff_plus
    */
 
   @Cron('*/5 * * * *', {
@@ -47,15 +50,15 @@ export class BatchService {
 
   // @Cron(CronExpression.EVERY_10_SECONDS, {
   @Cron(CronExpression.EVERY_DAY_AT_5AM, {
-    name: 'daily_pitcher_stats',
+    name: 'daily_stuff_plus',
     timeZone: 'America/New_York',
   })
-  async getDailyPitcherStats() {
+  async getDailyStuffPlus() {
     Logger.log('Starting FG Pitcher Job');
     try {
-      const jobType = JobType.daily_pitcher_stats;
-      const getStats = await this.dataService.getFgPitcherMetrics();
-      const getData = this.schedulerRegistry.getCronJob('daily_pitcher_stats');
+      const jobType = JobType.daily_stuff_plus;
+      const getStats = await this.dataService.getDailyStuffPlus();
+      const getData = this.schedulerRegistry.getCronJob('daily_stuff_plus');
       getData.start();
       const jobStatus =
         getStats.length <= 0 ? JobStatus.blank : JobStatus.success;

@@ -4,12 +4,15 @@ import {
   baseUrl,
   currentDayEndpoint,
   fangraphsBaseUrl,
+  stuffPlusEndpoint,
 } from '../utils/globals';
 import { JobStatus } from '../batch/enum/jobStatus.enum';
 import axios from 'axios';
 import { Repository } from 'typeorm';
-import { Batch } from '../batch/batch.entity';
-import { GameData } from './gameData.entity';
+import { Batch } from '../batch/Entities/batch.entity';
+import { GameData } from './Entities/gameData.entity';
+import { StuffPlusMetrics } from './Entities/stuffplus.entity';
+import { format } from 'date-fns';
 
 @Injectable()
 export class DataService {
@@ -18,6 +21,8 @@ export class DataService {
     private batchRepository: Repository<Batch>,
     @InjectRepository(GameData)
     private dataRepository: Repository<GameData>,
+    @InjectRepository(StuffPlusMetrics)
+    private stuffPlusRepository: Repository<StuffPlusMetrics>,
   ) {}
 
   // Method gets scores and run differentials per game
@@ -93,19 +98,127 @@ export class DataService {
   }
 
   // Gets StuffPlus metrics per day for pitchers.  Uses Fangraphs API
-  async getFgPitcherMetrics(): Promise<any> {
-    const url = `${fangraphsBaseUrl}/leaders/major-league/data?age=&pos=all&stats=pit&lg=all&qual=30&season=2025&season1=2025&startdate=2025-03-01&enddate=2025-11-01&month=0&sortcol=12&pageitems=20`;
+  async getDailyStuffPlus(): Promise<any> {
+    const url = `${fangraphsBaseUrl}/${stuffPlusEndpoint}`;
     try {
       const response: any = await axios.get(url);
-      if (response.data.length < 1) {
+      const data = response.data.data;
+      const date = format(new Date(), 'yyyy-LL-dd');
+      console.log(data);
+      if (data.length < 1) {
         Logger.warn('There are No Pitcher Stats today!');
         return JobStatus.blank;
       } else {
-        console.log(response.data);
+        for (let i = 0; i < data.length; i++) {
+          const fgId = data[i].playerid;
+          const mlbAmId = data[i].xMLBAMID;
+          const sp_s_ch = Math.ceil(data[i].sp_s_CH) || null;
+          const sp_l_ch = Math.ceil(data[i].sp_l_CH) || null;
+          const sp_s_ff = Math.ceil(data[i].sp_s_FF) || null;
+          const sp_l_ff = Math.ceil(data[i].sp_l_FF) || null;
+          const sp_s_SI = Math.ceil(data[i].sp_s_SI) || null;
+          const sp_l_SI = Math.ceil(data[i].sp_l_SI) || null;
+          const sp_s_SL = Math.ceil(data[i].sp_s_SL) || null;
+          const sp_l_SL = Math.ceil(data[i].sp_l_SL) || null;
+          const sp_s_KC = Math.ceil(data[i].sp_s_KC) || null;
+          const sp_l_KC = Math.ceil(data[i].sp_l_KC) || null;
+          const sp_s_FC = Math.ceil(data[i].sp_s_FC) || null;
+          const sp_l_FC = Math.ceil(data[i].sp_l_FC) || null;
+          const sp_s_FS = Math.ceil(data[i].sp_s_FS) || null;
+          const sp_l_FS = Math.ceil(data[i].sp_l_FS) || null;
+          const sp_s_FO = Math.ceil(data[i].sp_s_FO) || null;
+          const sp_l_FO = Math.ceil(data[i].sp_l_FO) || null;
+          const sp_stuff = Math.ceil(data[i].sp_stuff) || null;
+          const sp_location = Math.ceil(data[i].sp_location) || null;
+          const sp_pitching = Math.ceil(data[i].sp_pitching) || null;
+          Logger.log(`Writing Stuff Plus for FGID: ${fgId}`);
+          await this.writeStuffPlusValues(
+            date,
+            fgId,
+            mlbAmId,
+            sp_s_ch,
+            sp_l_ch,
+            sp_s_ff,
+            sp_l_ff,
+            sp_s_SI,
+            sp_l_SI,
+            sp_s_SL,
+            sp_l_SL,
+            sp_s_KC,
+            sp_l_KC,
+            sp_s_FC,
+            sp_l_FC,
+            sp_s_FS,
+            sp_l_FS,
+            sp_s_FO,
+            sp_l_FO,
+            sp_stuff,
+            sp_location,
+            sp_pitching,
+          );
+        }
+
         return response;
       }
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! IN DATA SERVICE: ${error}`);
+    }
+  }
+
+  // Writes values to DB table for Stuff Plus
+  async writeStuffPlusValues(
+    date: string,
+    fgId: string,
+    mlbAmId: string,
+    sp_s_ch: number,
+    sp_l_ch: number,
+    sp_s_ff: number,
+    sp_l_ff: number,
+    sp_s_SI: number,
+    sp_l_SI: number,
+    sp_s_SL: number,
+    sp_l_SL: number,
+    sp_s_KC: number,
+    sp_l_KC: number,
+    sp_s_FC: number,
+    sp_l_FC: number,
+    sp_s_FS: number,
+    sp_l_FS: number,
+    sp_s_FO: number,
+    sp_l_FO: number,
+    sp_stuff: number,
+    sp_location: number,
+    sp_pitching: number,
+  ): Promise<void> {
+    try {
+      const stuffPlus = this.stuffPlusRepository.create({
+        date: date,
+        fg_id: fgId,
+        xmlbamid: mlbAmId,
+        sp_s_ch: sp_s_ch,
+        sp_l_ch: sp_l_ch,
+        sp_s_ff: sp_s_ff,
+        sp_l_ff: sp_l_ff,
+        sp_s_SI: sp_s_SI,
+        sp_l_SI: sp_l_SI,
+        sp_s_SL: sp_s_SL,
+        sp_l_SL: sp_l_SL,
+        sp_s_KC: sp_s_KC,
+        sp_l_KC: sp_l_KC,
+        sp_s_FC: sp_s_FC,
+        sp_l_FC: sp_l_FC,
+        sp_s_FS: sp_s_FS,
+        sp_l_FS: sp_l_FS,
+        sp_s_FO: sp_s_FO,
+        sp_l_FO: sp_l_FO,
+        sp_stuff: sp_stuff,
+        sp_location: sp_location,
+        sp_pitching: sp_pitching,
+      });
+      console.log(stuffPlus);
+      await this.stuffPlusRepository.save(stuffPlus);
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
     }
   }
 }
