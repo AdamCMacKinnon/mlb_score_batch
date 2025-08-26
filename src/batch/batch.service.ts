@@ -48,7 +48,7 @@ export class BatchService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_10_SECONDS, {
+  // @Cron('*/3 * * * *', {
   @Cron(CronExpression.EVERY_DAY_AT_5AM, {
     name: 'daily_stuff_plus',
     timeZone: 'America/New_York',
