@@ -6,7 +6,7 @@ export const typeOrmConfigAsync: TypeOrmModuleAsyncOptions = {
   inject: [ConfigService],
   useFactory: async (configService: ConfigService) => ({
     type: 'postgres',
-    url: configService.get<string>('DB_URL'),
+    url: configService.get<string>('DATABASE_URL'),
     ssl: process.env.STAGE === 'prod' ? { rejectUnauthorized: false } : false,
     migrations: ['dist/migrations/*.js'],
     entities: ['dist/**/**/*.entity.js'],
