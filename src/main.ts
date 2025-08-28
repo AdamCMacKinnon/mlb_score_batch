@@ -2,12 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 
-import dns from 'dns';
-
-dns.setDefaultResultOrder('ipv4first');
-
 async function bootstrap() {
-  const port = 5600;
+  const port = process.env.PORT || 5600;
   const app = await NestFactory.create(AppModule);
   app.enableCors();
 
