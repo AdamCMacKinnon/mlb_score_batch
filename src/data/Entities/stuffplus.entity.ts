@@ -1,12 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('stuff_plus')
 export class StuffPlusMetrics {
-  @PrimaryGeneratedColumn('uuid')
-  entry_id: string;
-  @Column()
-  date: string;
-  @Column()
+  @PrimaryColumn()
   fg_id: string;
   @Column()
   xmlbamid: string;
