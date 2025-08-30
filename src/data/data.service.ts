@@ -12,7 +12,6 @@ import { Repository } from 'typeorm';
 import { Batch } from '../batch/Entities/batch.entity';
 import { GameData } from './Entities/gameData.entity';
 import { StuffPlusMetrics } from './Entities/stuffplus.entity';
-import { format } from 'date-fns';
 
 @Injectable()
 export class DataService {
@@ -103,7 +102,6 @@ export class DataService {
     try {
       const response: any = await axios.get(url);
       const data = response.data.data;
-      const date = format(new Date(), 'yyyy-LL-dd');
       if (data.length < 1) {
         Logger.warn('There are No Pitcher Stats today!');
         return JobStatus.blank;
@@ -132,7 +130,6 @@ export class DataService {
           const sp_pitching = Math.ceil(data[i].sp_pitching) || null;
           Logger.log(`Writing Stuff Plus for FGID: ${fgId}`);
           await this.writeStuffPlusValues(
-            date,
             fgId,
             mlbAmId,
             sp_s_ch,
@@ -166,7 +163,6 @@ export class DataService {
 
   // Writes values to DB table for Stuff Plus
   async writeStuffPlusValues(
-    date: string,
     fgId: string,
     mlbAmId: string,
     sp_s_ch: number,
@@ -190,31 +186,32 @@ export class DataService {
     sp_pitching: number,
   ): Promise<void> {
     try {
-      const stuffPlus = this.stuffPlusRepository.create({
-        date: date,
-        fg_id: fgId,
-        xmlbamid: mlbAmId,
-        sp_s_ch: sp_s_ch,
-        sp_l_ch: sp_l_ch,
-        sp_s_ff: sp_s_ff,
-        sp_l_ff: sp_l_ff,
-        sp_s_SI: sp_s_SI,
-        sp_l_SI: sp_l_SI,
-        sp_s_SL: sp_s_SL,
-        sp_l_SL: sp_l_SL,
-        sp_s_KC: sp_s_KC,
-        sp_l_KC: sp_l_KC,
-        sp_s_FC: sp_s_FC,
-        sp_l_FC: sp_l_FC,
-        sp_s_FS: sp_s_FS,
-        sp_l_FS: sp_l_FS,
-        sp_s_FO: sp_s_FO,
-        sp_l_FO: sp_l_FO,
-        sp_stuff: sp_stuff,
-        sp_location: sp_location,
-        sp_pitching: sp_pitching,
-      });
-      await this.stuffPlusRepository.save(stuffPlus);
+      await this.stuffPlusRepository.upsert(
+        {
+          fg_id: fgId,
+          xmlbamid: mlbAmId,
+          sp_s_ch,
+          sp_l_ch,
+          sp_s_ff,
+          sp_l_ff,
+          sp_s_SI,
+          sp_l_SI,
+          sp_s_SL,
+          sp_l_SL,
+          sp_s_KC,
+          sp_l_KC,
+          sp_s_FC,
+          sp_l_FC,
+          sp_s_FS,
+          sp_l_FS,
+          sp_s_FO,
+          sp_l_FO,
+          sp_stuff,
+          sp_location,
+          sp_pitching,
+        },
+        ['fg_id'],
+      );
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
     }

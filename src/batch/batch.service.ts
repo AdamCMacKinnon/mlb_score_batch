@@ -26,6 +26,7 @@ export class BatchService {
    * Daily, 6AM = daily_stuff_plus
    */
 
+  // runs every 5 minutes, daily.
   @Cron('*/5 * * * *', {
     // @Cron(CronExpression.EVERY_30_SECONDS, {
     name: 'score_updates',
@@ -48,17 +49,17 @@ export class BatchService {
     }
   }
 
-  // @Cron('*/3 * * * *', {
-  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
-    name: 'daily_stuff_plus',
+  // runs every Friday at 5AM
+  @Cron('0 5 * * 5', {
+    name: 'stuff_plus_update',
     timeZone: 'America/New_York',
   })
   async getDailyStuffPlus() {
     Logger.log('Starting FG Pitcher Job');
     try {
-      const jobType = JobType.daily_stuff_plus;
+      const jobType = JobType.stuff_plus_update;
       const getStats = await this.dataService.getDailyStuffPlus();
-      const getData = this.schedulerRegistry.getCronJob('daily_stuff_plus');
+      const getData = this.schedulerRegistry.getCronJob('stuff_plus_update');
       getData.start();
       const jobStatus =
         getStats.length <= 0 ? JobStatus.blank : JobStatus.success;
@@ -69,6 +70,7 @@ export class BatchService {
     }
   }
 
+  // runs after every batch job
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
     try {
       const batch = this.batchRepository.create({
