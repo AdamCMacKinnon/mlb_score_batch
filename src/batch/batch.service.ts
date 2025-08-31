@@ -70,6 +70,28 @@ export class BatchService {
     }
   }
 
+  // runs every Saturday at 6AM
+  // @Cron('0 6 * * 6', {
+  @Cron(CronExpression.EVERY_DAY_AT_8AM, {
+    name: 'pitcher_stats_update',
+    timeZone: 'America/New_York',
+  })
+  async getPitcherStats() {
+    Logger.log('Starting Daily Stuff Plus Job');
+    try {
+      const jobType = JobType.pitcher_stats_update;
+      const getStats = await this.dataService.getDailyPitcherStats();
+      const getData = this.schedulerRegistry.getCronJob('pitcher_stats_update');
+      getData.start();
+      const jobStatus =
+        getStats.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('Job Complete');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+    }
+  }
+
   // runs after every batch job
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
     try {

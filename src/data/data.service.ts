@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { Batch } from '../batch/Entities/batch.entity';
 import { GameData } from './Entities/gameData.entity';
 import { StuffPlusMetrics } from './Entities/stuffplus.entity';
+import { PitcherStats } from './Entities/pitcherStats.entity';
 
 @Injectable()
 export class DataService {
@@ -22,6 +23,8 @@ export class DataService {
     private dataRepository: Repository<GameData>,
     @InjectRepository(StuffPlusMetrics)
     private stuffPlusRepository: Repository<StuffPlusMetrics>,
+    @InjectRepository(PitcherStats)
+    private pitcherStatsRepository: Repository<PitcherStats>,
   ) {}
 
   // Method gets scores and run differentials per game
@@ -209,6 +212,132 @@ export class DataService {
           sp_stuff,
           sp_location,
           sp_pitching,
+        },
+        ['fg_id'],
+      );
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
+    }
+  }
+
+  // Gets daily pitcher stats
+  async getDailyPitcherStats(): Promise<any> {
+    const url = `${fangraphsBaseUrl}/${stuffPlusEndpoint}`;
+    try {
+      const response: any = await axios.get(url);
+      const data = response.data.data;
+      if (data.length < 1) {
+        Logger.warn('There are No Pitcher Stats today!');
+        return JobStatus.blank;
+      } else {
+        for (let i = 0; i < data.length; i++) {
+          const fgId = data[i].playerid;
+          const mlbAmId = data[i].xMLBAMID;
+
+          const wins = data[i].W ?? null;
+          const loss = data[i].L ?? null;
+          const sv = data[i].SV ?? null;
+          const games = data[i].G ?? null;
+          const games_started = data[i].GS ?? null;
+          const innings_pitched = data[i].IP ?? null;
+
+          const k_per_9 = data[i]['K/9'] ?? null;
+          const bb_per_9 = data[i]['BB/9'] ?? null;
+          const hr_per_9 = data[i]['HR/9'] ?? null;
+
+          const babip_against = data[i].BABIP ?? null;
+          const lob_pct = data[i]['LOB%'] ?? null;
+          const gb_pct = data[i]['GB%'] ?? null;
+          const hr_fb = data[i]['HR/FB'] ?? null;
+
+          const velo_fb = data[i].FBv ?? null; // fastball velocity
+          const era = data[i].ERA ?? null;
+          const x_era = data[i].xERA ?? null;
+          const fip = data[i].FIP ?? null;
+          const x_fip = data[i].xFIP ?? null;
+          const f_war = data[i].WAR ?? null;
+
+          Logger.log(`Writing Pitcher Stats for FGID: ${fgId}`);
+          await this.writePitcherStatsValues(
+            fgId,
+            mlbAmId,
+            wins,
+            loss,
+            sv,
+            games,
+            games_started,
+            innings_pitched,
+            k_per_9,
+            bb_per_9,
+            hr_per_9,
+            babip_against,
+            lob_pct,
+            gb_pct,
+            hr_fb,
+            velo_fb,
+            era,
+            x_era,
+            fip,
+            x_fip,
+            f_war,
+          );
+        }
+
+        return response;
+      }
+    } catch (error) {
+      Logger.error(`PITCHER STATS UPDATE ERROR: ${error}`);
+    }
+  }
+
+  // Writes values to DB table for Pitcher Stats
+  async writePitcherStatsValues(
+    fgId: string,
+    mlbAmId: string,
+    wins: number,
+    loss: number,
+    sv: number,
+    games: number,
+    games_started: number,
+    innings_pitched: number,
+    k_per_9: string,
+    bb_per_9: string,
+    hr_per_9: string,
+    babip_against: string,
+    lob_pct: string,
+    gb_pct: string,
+    hr_fb: string,
+    velo_fb: string,
+    era: string,
+    x_era: string,
+    fip: string,
+    x_fip: string,
+    f_war: string,
+  ): Promise<void> {
+    try {
+      await this.pitcherStatsRepository.upsert(
+        {
+          fg_id: fgId,
+          xmlbamid: mlbAmId,
+          wins,
+          loss,
+          sv,
+          games,
+          games_started,
+          innings_pitched,
+          k_per_9,
+          bb_per_9,
+          hr_per_9,
+          babip_against,
+          lob_pct,
+          gb_pct,
+          hr_fb,
+          velo_fb,
+          era,
+          x_era,
+          fip,
+          x_fip,
+          f_war,
         },
         ['fg_id'],
       );
