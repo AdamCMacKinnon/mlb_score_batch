@@ -6,10 +6,17 @@ import { Batch } from '../batch/Entities/batch.entity';
 import { GameData } from './Entities/gameData.entity';
 import { StuffPlusMetrics } from './Entities/stuffplus.entity';
 import { PitcherStats } from './Entities/pitcherStats.entity';
+import { SCPitchPercentiles } from './Entities/sc_pitch_percentiles.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Batch, GameData, StuffPlusMetrics, PitcherStats]),
+    TypeOrmModule.forFeature([
+      Batch,
+      GameData,
+      StuffPlusMetrics,
+      PitcherStats,
+      SCPitchPercentiles,
+    ]),
   ],
   controllers: [],
   providers: [DataService, BatchService],
