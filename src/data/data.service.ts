@@ -13,6 +13,7 @@ import { Batch } from '../batch/Entities/batch.entity';
 import { GameData } from './Entities/gameData.entity';
 import { StuffPlusMetrics } from './Entities/stuffplus.entity';
 import { PitcherStats } from './Entities/pitcherStats.entity';
+import { PitcherName } from './Entities/pitcherName.entity';
 
 @Injectable()
 export class DataService {
@@ -25,6 +26,8 @@ export class DataService {
     private stuffPlusRepository: Repository<StuffPlusMetrics>,
     @InjectRepository(PitcherStats)
     private pitcherStatsRepository: Repository<PitcherStats>,
+    @InjectRepository(PitcherName)
+    private pitcherNameRepository: Repository<PitcherName>,
   ) {}
 
   // Method gets scores and run differentials per game
@@ -99,7 +102,42 @@ export class DataService {
     }
   }
 
-  // Gets StuffPlus metrics per day for pitchers.  Uses Fangraphs API
+  async updatePitcherList(): Promise<any> {
+    const url = `${fangraphsBaseUrl}/${stuffPlusEndpoint}`;
+    try {
+      const response: any = await axios.get(url);
+      const data = response.data.data;
+      for (let i = 0; i < data.length; i++) {
+        const fgId = data[i].playerid;
+        const mlbAmId = data[i].xMLBAMID;
+        const playerName = data[i].Name;
+        Logger.log(`Adding Pitcher to List: ${fgId} -- ${playerName}`);
+        await this.updatePitcherListValues(fgId, mlbAmId, playerName);
+      }
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! WHILE UPDATING PITCHER LIST: ${error}`);
+    }
+  }
+
+  async updatePitcherListValues(
+    fgId: string,
+    mlbAmId: string,
+    playerName: string,
+  ): Promise<void> {
+    try {
+      await this.pitcherNameRepository.upsert(
+        {
+          fg_id: fgId,
+          xmlbamid: mlbAmId,
+          player_name: playerName,
+        },
+        ['fg_id'],
+      );
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! WRITING PITCHER LIST VALUES ${error}`);
+    }
+  }
+
   async getDailyStuffPlus(): Promise<any> {
     const url = `${fangraphsBaseUrl}/${stuffPlusEndpoint}`;
     try {
