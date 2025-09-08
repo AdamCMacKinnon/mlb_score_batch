@@ -49,8 +49,8 @@ export class BatchService {
     }
   }
 
-  // runs every Friday at 5AM
-  @Cron('0 5 * * 5', {
+  // runs every Friday at 6AM
+  @Cron('0 6 * * 5', {
     name: 'stuff_plus_update',
     timeZone: 'America/New_York',
   })
@@ -70,8 +70,6 @@ export class BatchService {
     }
   }
 
-  // runs every Saturday at 6AM
-  // @Cron('0 6 * * 6', {
   @Cron(CronExpression.EVERY_DAY_AT_8AM, {
     name: 'pitcher_stats_update',
     timeZone: 'America/New_York',
@@ -89,6 +87,28 @@ export class BatchService {
       Logger.log('Job Complete');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
+    // @Cron(CronExpression.EVERY_MINUTE, {
+    name: 'pitcher_list_update',
+    timeZone: 'America/New_York',
+  })
+  async getPitcherList() {
+    Logger.log('Starting Daily Pitcher List Job');
+    try {
+      const jobType = JobType.pitcher_list_update;
+      await this.dataService.updatePitcherList();
+      const getData = this.schedulerRegistry.getCronJob('pitcher_list_update');
+      getData.start();
+      const jobStatus = JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('Job Complete');
+    } catch (error) {
+      Logger.error(
+        `THERE WAS AN ERROR IN BATCH JOB! ${JobType.pitcher_list_update} *** ${error}`,
+      );
     }
   }
 
