@@ -14,6 +14,7 @@ import { GameData } from './Entities/gameData.entity';
 import { StuffPlusMetrics } from './Entities/stuffplus.entity';
 import { PitcherStats } from './Entities/pitcherStats.entity';
 import { PitcherName } from './Entities/pitcherName.entity';
+import * as cheerio from 'cheerio';
 
 @Injectable()
 export class DataService {
@@ -125,11 +126,14 @@ export class DataService {
     playerName: string,
   ): Promise<void> {
     try {
+      const rawName = cheerio.load(playerName);
+      const cleanName = cheerio.load(rawName('a').text());
+
       await this.pitcherNameRepository.upsert(
         {
           fg_id: fgId,
           xmlbamid: mlbAmId,
-          player_name: playerName,
+          player_name: cleanName.text(),
         },
         ['fg_id'],
       );

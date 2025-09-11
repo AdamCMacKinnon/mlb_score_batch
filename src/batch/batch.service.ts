@@ -21,9 +21,9 @@ export class BatchService {
   /**
    * BATCH SCHEDULE:
    * Every 5 minutes = score_updates
-   * Daily, 4AM = fg_pitcher_update
-   * Daily, 5AM = fg_batter_update
-   * Daily, 6AM = daily_stuff_plus
+   * Daily, 5AM = pitcher_name_update
+   * Daily, 8AM = pitcher_stats_update
+   * Weekly, 6AM Friday = stuff_plus_update
    */
 
   // runs every 5 minutes, daily.
@@ -90,8 +90,8 @@ export class BatchService {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
-    // @Cron(CronExpression.EVERY_MINUTE, {
+  // @Cron(CronExpression.EVERY_DAY_AT_5AM, {
+  @Cron(CronExpression.EVERY_MINUTE, {
     name: 'pitcher_list_update',
     timeZone: 'America/New_York',
   })
