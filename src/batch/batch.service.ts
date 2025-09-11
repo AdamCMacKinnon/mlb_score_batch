@@ -90,8 +90,8 @@ export class BatchService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_DAY_AT_5AM, {
-  @Cron(CronExpression.EVERY_MINUTE, {
+  @Cron(CronExpression.EVERY_DAY_AT_5AM, {
+    // @Cron(CronExpression.EVERY_MINUTE, {
     name: 'pitcher_list_update',
     timeZone: 'America/New_York',
   })
