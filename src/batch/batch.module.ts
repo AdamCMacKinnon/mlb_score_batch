@@ -10,7 +10,7 @@ import { StuffPlusMetrics } from '../data/Entities/stuffplus.entity';
 import { PitcherStats } from '../data/Entities/pitcherStats.entity';
 import { SCPitchPercentiles } from '../data/Entities/sc_pitch_percentiles.entity';
 import { PitcherName } from '../data/Entities/pitcherName.entity';
-import { PitcherNameRepository } from '../data/Entities/pitcherName.repository';
+import { BatterName } from '../data/Entities/batterName.entity';
 
 @Module({
   imports: [
@@ -22,13 +22,9 @@ import { PitcherNameRepository } from '../data/Entities/pitcherName.repository';
       PitcherStats,
       SCPitchPercentiles,
       PitcherName,
+      BatterName,
     ]),
   ],
-  providers: [
-    BatchService,
-    DataService,
-    BatchRepository,
-    PitcherNameRepository,
-  ],
+  providers: [BatchService, DataService, BatchRepository],
 })
 export class BatchModule {}

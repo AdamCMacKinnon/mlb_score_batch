@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   baseUrl,
+  batterEndpoint,
   currentDayEndpoint,
   fangraphsBaseUrl,
   stuffPlusEndpoint,
@@ -15,6 +16,7 @@ import { StuffPlusMetrics } from './Entities/stuffplus.entity';
 import { PitcherStats } from './Entities/pitcherStats.entity';
 import { PitcherName } from './Entities/pitcherName.entity';
 import * as cheerio from 'cheerio';
+import { BatterName } from './Entities/batterName.entity';
 
 @Injectable()
 export class DataService {
@@ -29,6 +31,8 @@ export class DataService {
     private pitcherStatsRepository: Repository<PitcherStats>,
     @InjectRepository(PitcherName)
     private pitcherNameRepository: Repository<PitcherName>,
+    @InjectRepository(BatterName)
+    private batterNameRepository: Repository<BatterName>,
   ) {}
 
   // Method gets scores and run differentials per game
@@ -104,6 +108,7 @@ export class DataService {
   }
 
   async updatePitcherList(): Promise<any> {
+    const isPitcher = true;
     const url = `${fangraphsBaseUrl}/${stuffPlusEndpoint}`;
     try {
       const response: any = await axios.get(url);
@@ -113,14 +118,17 @@ export class DataService {
         const mlbAmId = data[i].xMLBAMID;
         const playerName = data[i].Name;
         Logger.log(`Adding Pitcher to List: ${fgId} -- ${playerName}`);
-        await this.updatePitcherListValues(fgId, mlbAmId, playerName);
+        await this.updatePlayerListValues(isPitcher, fgId, mlbAmId, playerName);
       }
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! WHILE UPDATING PITCHER LIST: ${error}`);
     }
   }
 
-  async updatePitcherListValues(
+  // Function is re-usable for batter and pitcher lists
+  // consider exporting to utils
+  async updatePlayerListValues(
+    isPitcher: boolean,
     fgId: string,
     mlbAmId: string,
     playerName: string,
@@ -128,15 +136,25 @@ export class DataService {
     try {
       const rawName = cheerio.load(playerName);
       const cleanName = cheerio.load(rawName('a').text());
-
-      await this.pitcherNameRepository.upsert(
-        {
-          fg_id: fgId,
-          xmlbamid: mlbAmId,
-          player_name: cleanName.text(),
-        },
-        ['fg_id'],
-      );
+      if (isPitcher) {
+        await this.pitcherNameRepository.upsert(
+          {
+            fg_id: fgId,
+            xmlbamid: mlbAmId,
+            player_name: cleanName.text(),
+          },
+          ['fg_id'],
+        );
+      } else {
+        await this.batterNameRepository.upsert(
+          {
+            fg_id: fgId,
+            xmlbamid: mlbAmId,
+            player_name: cleanName.text(),
+          },
+          ['fg_id'],
+        );
+      }
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! WRITING PITCHER LIST VALUES ${error}`);
     }
@@ -385,6 +403,24 @@ export class DataService {
       );
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
+    }
+  }
+
+  async updateBatterList(): Promise<any> {
+    const isPitcher = false;
+    const url = `${fangraphsBaseUrl}/${batterEndpoint}`;
+    try {
+      const response: any = await axios.get(url);
+      const data = response.data.data;
+      for (let i = 0; i < data.length; i++) {
+        const fgId = data[i].playerid;
+        const mlbAmId = data[i].xMLBAMID;
+        const playerName = data[i].Name;
+        Logger.log(`Adding Batter to List: ${fgId} -- ${playerName}`);
+        await this.updatePlayerListValues(isPitcher, fgId, mlbAmId, playerName);
+      }
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! WHILE UPDATING BATTER LIST: ${error}`);
     }
   }
 }
