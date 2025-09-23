@@ -8,6 +8,7 @@ import { StuffPlusMetrics } from './Entities/stuffplus.entity';
 import { PitcherStats } from './Entities/pitcherStats.entity';
 import { SCPitchPercentiles } from './Entities/sc_pitch_percentiles.entity';
 import { PitcherName } from './Entities/pitcherName.entity';
+import { BatterName } from './Entities/batterName.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PitcherName } from './Entities/pitcherName.entity';
       PitcherStats,
       SCPitchPercentiles,
       PitcherName,
+      BatterName,
     ]),
   ],
   controllers: [],
