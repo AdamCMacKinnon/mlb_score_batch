@@ -11,6 +11,7 @@ import { PitcherStats } from '../data/Entities/pitcherStats.entity';
 import { SCPitchPercentiles } from '../data/Entities/sc_pitch_percentiles.entity';
 import { PitcherName } from '../data/Entities/pitcherName.entity';
 import { BatterName } from '../data/Entities/batterName.entity';
+import { BatterStats } from '../data/Entities/batterStats.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BatterName } from '../data/Entities/batterName.entity';
       SCPitchPercentiles,
       PitcherName,
       BatterName,
+      BatterStats,
     ]),
   ],
   providers: [BatchService, DataService, BatchRepository],

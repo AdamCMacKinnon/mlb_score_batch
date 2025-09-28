@@ -4,4 +4,5 @@ export enum JobType {
   pitcher_stats_update = 'pitcher_stats_update',
   pitcher_list_update = 'pitcher_list_update',
   batter_list_update = 'batter_list_update',
+  batter_stats_update = 'batter_stats_update',
 }
