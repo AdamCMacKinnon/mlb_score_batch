@@ -24,28 +24,28 @@ export class BatterStats {
   sb: number;
   @Column()
   cs: number;
-  @Column({ precision: 5, scale: 3 })
+  @Column('numeric', { precision: 5, scale: 3 })
   avg: string;
-  @Column({ precision: 5, scale: 3 })
+  @Column('numeric', { precision: 5, scale: 3 })
   obp: string;
-  @Column({ precision: 5, scale: 3 })
+  @Column('numeric', { precision: 5, scale: 3 })
   slg: string;
-  @Column({ precision: 5, scale: 3 })
+  @Column('numeric', { precision: 5, scale: 3 })
   iso: string;
-  @Column({ precision: 5, scale: 3 })
+  @Column('numeric', { precision: 5, scale: 3 })
   babip: string;
-  @Column({ precision: 5, scale: 3 })
+  @Column('numeric', { precision: 5, scale: 3, nullable: true })
   k_pct: string;
-  @Column({ precision: 5, scale: 1 })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   bb_pct: string;
-  @Column({ precision: 5, scale: 1, nullable: true })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   ev: string;
-  @Column({ precision: 5, scale: 1, nullable: true })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   barrel_pct: string;
-  @Column({ precision: 5, scale: 1, nullable: true })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   hard_hit_pct: string;
-  @Column({ precision: 5, scale: 1, nullable: true })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   o_swing_pct: string;
-  @Column({ precision: 5, scale: 1, nullable: true })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   z_swing_pct: string;
 }
