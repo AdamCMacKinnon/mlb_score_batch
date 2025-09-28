@@ -134,8 +134,8 @@ export class BatchService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_DAY_AT_9AM, {
-  @Cron(CronExpression.EVERY_MINUTE, {
+  @Cron(CronExpression.EVERY_DAY_AT_9AM, {
+    // @Cron(CronExpression.EVERY_MINUTE, {
     name: 'batter_stats_update',
     timeZone: 'America/New_York',
   })
