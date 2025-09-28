@@ -134,6 +134,27 @@ export class BatchService {
     }
   }
 
+  // @Cron(CronExpression.EVERY_DAY_AT_9AM, {
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: 'batter_stats_update',
+    timeZone: 'America/New_York',
+  })
+  async getBatterStats() {
+    Logger.log('Starting Daily Batter Stats Job');
+    try {
+      const jobType = JobType.batter_stats_update;
+      const getStats = await this.dataService.getDailyBatterStats();
+      const getData = this.schedulerRegistry.getCronJob('batter_stats_update');
+      getData.start();
+      const jobStatus =
+        getStats.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('Job Complete');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+    }
+  }
+
   // runs after every batch job
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
     try {

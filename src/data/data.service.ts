@@ -17,6 +17,7 @@ import { PitcherStats } from './Entities/pitcherStats.entity';
 import { PitcherName } from './Entities/pitcherName.entity';
 import * as cheerio from 'cheerio';
 import { BatterName } from './Entities/batterName.entity';
+import { BatterStats } from './Entities/batterStats.entity';
 
 @Injectable()
 export class DataService {
@@ -33,6 +34,8 @@ export class DataService {
     private pitcherNameRepository: Repository<PitcherName>,
     @InjectRepository(BatterName)
     private batterNameRepository: Repository<BatterName>,
+    @InjectRepository(BatterStats)
+    private batterStatsRepository: Repository<BatterStats>,
   ) {}
 
   // Method gets scores and run differentials per game
@@ -347,6 +350,139 @@ export class DataService {
       }
     } catch (error) {
       Logger.error(`PITCHER STATS UPDATE ERROR: ${error}`);
+    }
+  }
+
+  async getDailyBatterStats(): Promise<any> {
+    const url = `${fangraphsBaseUrl}/${batterEndpoint}`;
+    try {
+      const response: any = await axios.get(url);
+      const data = response.data.data;
+      if (data.length < 1) {
+        Logger.warn('There are No Batter Stats today!');
+        return JobStatus.blank;
+      } else {
+        for (let i = 0; i < data.length; i++) {
+          const fgId = data[i].playerid;
+          const mlbAmId = data[i].xMLBAMID;
+
+          const g = data[i].G ?? null;
+          const ab = data[i].AB ?? null;
+          const pa = data[i].PA ?? null;
+          const dbl = data[i]['2B'] ?? null;
+          const hr = data[i].HR ?? null;
+          const r = data[i].R ?? null;
+          const rbi = data[i].RBI ?? null;
+          const sb = data[i].SB ?? null;
+          const cs = data[i].CS ?? null;
+
+          const avg = data[i].AVG ?? null;
+          const obp = data[i].OBP ?? null;
+          const slg = data[i].SLG ?? null;
+          const iso = data[i].ISO ?? null;
+          const babip = data[i].BABIP ?? null;
+
+          const k_pct = data[i].K_PCT ?? null;
+          const bb_pct = data[i].BB_PCT ?? null;
+
+          const ev = data[i].EV ?? null; // exit velocity
+          const barrel_pct = data[i].BARREL_PCT ?? null;
+          const hard_hit_pct = data[i].HARD_HIT_PCT ?? null;
+          const o_swing_pct = data[i].O_SWIPE_PCT ?? null;
+          const z_swing_pct = data[i].Z_SWIPE_PCT ?? null;
+
+          Logger.log(`Writing Batter Stats for FGID: ${fgId}`);
+          await this.writeBatterStatsValues(
+            fgId,
+            mlbAmId,
+            g,
+            ab,
+            pa,
+            dbl,
+            hr,
+            r,
+            rbi,
+            sb,
+            cs,
+            avg,
+            obp,
+            slg,
+            iso,
+            babip,
+            k_pct,
+            bb_pct,
+            ev,
+            barrel_pct,
+            hard_hit_pct,
+            o_swing_pct,
+            z_swing_pct,
+          );
+        }
+
+        return response;
+      }
+    } catch (error) {
+      Logger.error(`BATTER STATS UPDATE ERROR: ${error}`);
+    }
+  }
+
+  // Writes values to DB table for Batter Stats
+  async writeBatterStatsValues(
+    fgId: string,
+    mlbAmId: string,
+    g: number,
+    ab: number,
+    pa: number,
+    dbl: number,
+    hr: number,
+    r: number,
+    rbi: number,
+    sb: number,
+    cs: number,
+    avg: string,
+    obp: string,
+    slg: string,
+    iso: string,
+    babip: string,
+    k_pct: string,
+    bb_pct: string,
+    ev: string,
+    barrel_pct: string,
+    hard_hit_pct: string,
+    o_swing_pct: string,
+    z_swing_pct: string,
+  ): Promise<void> {
+    try {
+      await this.batterStatsRepository.upsert(
+        {
+          fg_id: fgId,
+          xmlbamid: mlbAmId,
+          g,
+          ab,
+          pa,
+          dbl,
+          hr,
+          r,
+          rbi,
+          sb,
+          cs,
+          avg,
+          obp,
+          slg,
+          iso,
+          babip,
+          k_pct,
+          bb_pct,
+          ev,
+          barrel_pct,
+          hard_hit_pct,
+          o_swing_pct,
+          z_swing_pct,
+        },
+        ['fg_id'],
+      );
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! IN DATA REPO ${error}`);
     }
   }
 
