@@ -27,7 +27,7 @@ export class BatchService {
    */
 
   // runs every 5 minutes, daily.
-  @Cron('*/5 * * * *', {
+  @Cron(CronExpression.EVERY_2ND_HOUR, {
     // @Cron(CronExpression.EVERY_30_SECONDS, {
     name: 'score_updates',
     timeZone: 'America/New_York',
@@ -46,6 +46,7 @@ export class BatchService {
       Logger.log('Job Complete');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+      await this.batchJobData(JobType.score_update, JobStatus.failure);
     }
   }
 
@@ -67,6 +68,7 @@ export class BatchService {
       Logger.log('Job Complete');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+      await this.batchJobData(JobType.stuff_plus_update, JobStatus.failure);
     }
   }
 
@@ -87,6 +89,7 @@ export class BatchService {
       Logger.log('Job Complete');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+      await this.batchJobData(JobType.pitcher_stats_update, JobStatus.failure);
     }
   }
 
@@ -109,6 +112,7 @@ export class BatchService {
       Logger.error(
         `THERE WAS AN ERROR IN BATCH JOB! ${JobType.pitcher_list_update} *** ${error}`,
       );
+      await this.batchJobData(JobType.pitcher_list_update, JobStatus.failure);
     }
   }
 
@@ -131,6 +135,7 @@ export class BatchService {
       Logger.error(
         `THERE WAS AN ERROR IN BATCH JOB! ${JobType.batter_list_update} *** ${error}`,
       );
+      await this.batchJobData(JobType.batter_list_update, JobStatus.failure);
     }
   }
 
@@ -152,6 +157,7 @@ export class BatchService {
       Logger.log('Job Complete');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+      await this.batchJobData(JobType.batter_stats_update, JobStatus.failure);
     }
   }
 
