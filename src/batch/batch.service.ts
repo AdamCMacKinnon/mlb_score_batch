@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JobType } from './enum/jobType.enum';
 import { format } from 'date-fns';
 import { JobStatus } from './enum/jobStatus.enum';
+import { ProjectionTypes } from './enum/projectionTypes.enum';
 import { DataService } from '../data/data.service';
 import { Batch } from './Entities/batch.entity';
 import { Repository } from 'typeorm';
@@ -175,25 +176,100 @@ export class BatchService {
     }
   }
 
+  /**
+   * Breaking up FG Projection jobs, as they are released and updated on a rolling basis.
+   * oopsy = fg_prog_oopsy
+   * zips = fg_prog_zips
+   */
+  // @Cron(CronExpression.EVERY_MINUTE, {
+  //   name: 'fg_projections',
+  //   timeZone: 'America/New_York',
+  // })
+  // async getFgProjections() {
+  //   Logger.log('Fetching Fangraphs Projections');
+  //   try {
+  //     const jobType = JobType.fg_projections;
+  //     const projType = 'oopsy';
+  //     const fetchProjections =
+  //       await this.dataService.fetchFgProjections(projType);
+  //     const getData = this.schedulerRegistry.getCronJob('fg_projections');
+  //     getData.start();
+  //     const jobStatus =
+  //       fetchProjections.length <= 0 ? JobStatus.blank : JobStatus.success;
+  //     await this.batchJobData(jobType, jobStatus);
+  //     Logger.log('FG Projections Fetched and Updated!!');
+  //   } catch (error) {
+  //     Logger.error('THERE WAS AN ERROR FETCHING FG PROJECTIONS **' + error);
+  //     await this.batchJobData(JobType.fg_projections, JobStatus.failure);
+  //   }
+  // }
+
   @Cron(CronExpression.EVERY_MINUTE, {
-    name: 'fg_projections',
+    name: 'fg_projections_oopsy',
     timeZone: 'America/New_York',
   })
-  async getFgProjections() {
-    Logger.log('Fetching Fangraphs Projections');
+  async getFgProjectionsOopsy() {
+    Logger.log('Fetching OOPSY Projections');
     try {
-      const jobType = JobType.fg_projections;
-      const projType = 'oopsy';
-      const fetchProjections = await this.dataService.fetchFgProjections(projType);
-      const getData = this.schedulerRegistry.getCronJob('fg_projections');
+      const jobType = JobType.fg_projections_oopsy;
+      const fetchProjections = await this.dataService.fetchFgProjections(
+        ProjectionTypes.oopsy,
+      );
+      const getData = this.schedulerRegistry.getCronJob('fg_projections_oopsy');
       getData.start();
       const jobStatus =
         fetchProjections.length <= 0 ? JobStatus.blank : JobStatus.success;
       await this.batchJobData(jobType, jobStatus);
-      Logger.log('FG Projections Fetched and Updated!!');
+      Logger.log('OOPSY Projections Fetched and Updated!!');
     } catch (error) {
       Logger.error('THERE WAS AN ERROR FETCHING FG PROJECTIONS **' + error);
-      await this.batchJobData(JobType.fg_projections, JobStatus.failure);
+      await this.batchJobData(JobType.fg_projections_oopsy, JobStatus.failure);
+    }
+  }
+
+  @Cron('*/2 * * * *', {
+    name: 'fg_projections_zips',
+    timeZone: 'America/New_York',
+  })
+  async getFgProjectionsZips() {
+    Logger.log('Fetching ZiPS Projections');
+    try {
+      const jobType = JobType.fg_projections_zips;
+      const fetchProjections = await this.dataService.fetchFgProjections(
+        ProjectionTypes.zips,
+      );
+      const getData = this.schedulerRegistry.getCronJob('fg_projections_zips');
+      getData.start();
+      const jobStatus =
+        fetchProjections.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('ZiPS Projections Fetched and Updated!!');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR FETCHING FG PROJECTIONS **' + error);
+      await this.batchJobData(JobType.fg_projections_zips, JobStatus.failure);
+    }
+  }
+
+  @Cron('*/2 * * * *', {
+    name: 'fg_projections_atc',
+    timeZone: 'America/New_York',
+  })
+  async getFgProjectionsAtc() {
+    Logger.log('Fetching ATC Projections');
+    try {
+      const jobType = JobType.fg_projections_atc;
+      const fetchProjections = await this.dataService.fetchFgProjections(
+        ProjectionTypes.atc,
+      );
+      const getData = this.schedulerRegistry.getCronJob('fg_projections_atc');
+      getData.start();
+      const jobStatus =
+        fetchProjections.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('ATC Projections Fetched and Updated!!');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR FETCHING FG PROJECTIONS **' + error);
+      await this.batchJobData(JobType.fg_projections_atc, JobStatus.failure);
     }
   }
 }
