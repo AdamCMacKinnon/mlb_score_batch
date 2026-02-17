@@ -174,4 +174,26 @@ export class BatchService {
       Logger.error(`ERROR INSERTING BATCH DATA: ${error}`);
     }
   }
+
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: 'fg_projections',
+    timeZone: 'America/New_York',
+  })
+  async getFgProjections() {
+    Logger.log('Fetching Fangraphs Projections');
+    try {
+      const jobType = JobType.fg_projections;
+      const projType = 'oopsy';
+      const fetchProjections = await this.dataService.fetchFgProjections(projType);
+      const getData = this.schedulerRegistry.getCronJob('fg_projections');
+      getData.start();
+      const jobStatus =
+        fetchProjections.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('FG Projections Fetched and Updated!!');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR FETCHING FG PROJECTIONS **' + error);
+      await this.batchJobData(JobType.fg_projections, JobStatus.failure);
+    }
+  }
 }

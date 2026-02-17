@@ -6,6 +6,7 @@ import {
   currentDayEndpoint,
   fangraphsBaseUrl,
   stuffPlusEndpoint,
+  fg_baseUrl,
 } from '../utils/globals';
 import { JobStatus } from '../batch/enum/jobStatus.enum';
 import axios from 'axios';
@@ -557,6 +558,46 @@ export class DataService {
       }
     } catch (error) {
       Logger.error(`THERE WAS AN ERROR! WHILE UPDATING BATTER LIST: ${error}`);
+    }
+  }
+
+  async fetchFgProjections(projType: string): Promise<any[]> {
+    try {
+      const url = `${fg_baseUrl}?pos=all&type=${projType}&stats=bat`;
+
+      Logger.log(`Fetching ${projType} Projections from Fangraphs`);
+
+      const response: any = await axios.get(url);
+
+      const projections = response.data;
+
+      if (!projections) {
+        Logger.error(`No projections found in response`);
+        Logger.error(JSON.stringify(response.data, null, 2));
+        return [];
+      }
+
+      Logger.log(`Received ${projections.length} projections`);
+      Logger.log(projections.length);
+
+      return projections; // ✅ IMPORTANT
+    } catch (error: any) {
+      Logger.error(`FG FETCH ERROR`);
+      Logger.error(error.message);
+
+      if (error.response?.data) {
+        Logger.error(JSON.stringify(error.response.data, null, 2));
+      }
+
+      return []; // ✅ prevents downstream crashes
+    }
+  }
+
+  async writeToProjectionsTable(): Promise<any> {
+    try {
+      console.log('yay!');
+    } catch (error) {
+      console.log(error);
     }
   }
 }
