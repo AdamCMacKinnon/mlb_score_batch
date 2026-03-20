@@ -572,24 +572,23 @@ export class DataService {
       const projections = response.data;
 
       if (!projections) {
-        Logger.error(`No projections found in response`);
-        Logger.error(JSON.stringify(response.data, null, 2));
+        Logger.warn(`No projections found in response`);
+        Logger.warn(JSON.stringify(response.data, null, 2));
         return [];
       }
 
       Logger.log(`Received ${projections.length} projections`);
-      Logger.log(projections.length);
 
-      return projections; // ✅ IMPORTANT
+      return projections;
     } catch (error: any) {
-      Logger.error(`FG FETCH ERROR`);
+      Logger.error(`PROJECTIONS FOR ${projType.toUpperCase()} FETCH ERROR`);
       Logger.error(error.message);
 
       if (error.response?.data) {
         Logger.error(JSON.stringify(error.response.data, null, 2));
       }
 
-      return []; // ✅ prevents downstream crashes
+      return [];
     }
   }
 

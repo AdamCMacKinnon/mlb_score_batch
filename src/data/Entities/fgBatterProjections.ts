@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('fg_batter_projections')
-export class FgProjections {
+export class FgBatterProjections {
   @PrimaryColumn()
   fg_id: string;
   @Column()
