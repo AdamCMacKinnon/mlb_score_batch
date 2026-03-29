@@ -161,6 +161,27 @@ export class BatchService {
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: 'pitch_logs_update',
+    timeZone: 'America/New_York',
+  })
+  async getPitchLogs() {
+    Logger.log('Starting Pitch Logs Job');
+    try {
+      const jobType = JobType.pitch_logs_update;
+      const getPitchLogs = await this.dataService.getPitchStream();
+      const getData = this.schedulerRegistry.getCronJob('pitch_logs_update');
+      getData.start();
+      const jobStatus =
+        getPitchLogs.length <= 0 ? JobStatus.blank : JobStatus.success;
+      await this.batchJobData(jobType, jobStatus);
+      Logger.log('Job Complete');
+    } catch (error) {
+      Logger.error('THERE WAS AN ERROR IN BATCH JOB! *** ' + error);
+      await this.batchJobData(JobType.pitch_logs_update, JobStatus.failure);
+    }
+  }
+
   // runs after every batch job
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
     try {

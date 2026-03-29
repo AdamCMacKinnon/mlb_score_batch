@@ -559,4 +559,35 @@ export class DataService {
       Logger.error(`THERE WAS AN ERROR! WHILE UPDATING BATTER LIST: ${error}`);
     }
   }
+
+  async getPitchStream(): Promise<any> {
+    const url = `${baseUrl}/${currentDayEndpoint}`;
+    try {
+      const gameResponse: any = await axios.get(url);
+      const totalGames = gameResponse.data.dates[0]?.games;
+      if (!totalGames) {
+        Logger.warn('There are No Games today!');
+        return JobStatus.blank;
+      } else {
+        const gamePkList = totalGames.map(
+          (game: { gamePk: any }) => game.gamePk,
+        );
+        for (let i = 0; i < gamePkList.length; i++) {
+          const gamePk = gamePkList[i];
+          const liveStreamUrl = `${baseUrl}.1/game/${gamePk}/feed/live`;
+          try {
+            const liveStreamResponse: any = await axios.get(liveStreamUrl);
+            const allPlays = liveStreamResponse.data.liveData.plays.allPlays;
+            Logger.log(allPlays[0].result.description);
+          } catch (error) {
+            Logger.error(
+              `THERE WAS AN ERROR! GETTING PITCH STREAM DATA ${error}`,
+            );
+          }
+        }
+      }
+    } catch (error) {
+      Logger.error(`THERE WAS AN ERROR! IN DATA SERVICE: ${error}`);
+    }
+  }
 }
