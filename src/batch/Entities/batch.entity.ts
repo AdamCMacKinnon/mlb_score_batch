@@ -2,7 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { JobType } from '../enum/jobType.enum';
@@ -10,7 +10,7 @@ import { JobStatus } from '../enum/jobStatus.enum';
 
 @Entity('batch')
 export class Batch {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   job_id: string;
 
   @Column()

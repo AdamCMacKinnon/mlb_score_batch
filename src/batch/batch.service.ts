@@ -8,6 +8,7 @@ import { JobStatus } from './enum/jobStatus.enum';
 import { DataService } from '../data/data.service';
 import { Batch } from './Entities/batch.entity';
 import { Repository } from 'typeorm';
+import { jobIdCreator } from '../utils/globals';
 
 @Injectable()
 export class BatchService {
@@ -163,8 +164,10 @@ export class BatchService {
 
   // runs after every batch job
   async batchJobData(jobType: JobType, jobStatus: JobStatus) {
+    const jobId = jobIdCreator(jobType);
     try {
       const batch = this.batchRepository.create({
+        job_id: jobId,
         job_type: jobType,
         job_status: jobStatus,
       });
