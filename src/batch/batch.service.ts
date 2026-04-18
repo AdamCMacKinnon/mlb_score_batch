@@ -27,7 +27,7 @@ export class BatchService {
    */
 
   // runs every 5 minutes, daily.
-  @Cron(CronExpression.EVERY_2ND_HOUR, {
+  @Cron(CronExpression.EVERY_5_MINUTES, {
     // @Cron(CronExpression.EVERY_30_SECONDS, {
     name: 'score_updates',
     timeZone: 'America/New_York',
