@@ -25,27 +25,27 @@ export class BatterStats {
   @Column()
   cs: number;
   @Column('numeric', { precision: 5, scale: 3 })
-  avg: string;
+  avg: number;
   @Column('numeric', { precision: 5, scale: 3 })
-  obp: string;
+  obp: number;
   @Column('numeric', { precision: 5, scale: 3 })
-  slg: string;
+  slg: number;
   @Column('numeric', { precision: 5, scale: 3 })
-  iso: string;
+  iso: number;
   @Column('numeric', { precision: 5, scale: 3 })
-  babip: string;
+  babip: number;
   @Column('numeric', { precision: 5, scale: 3, nullable: true })
-  k_pct: string;
+  k_pct: number;
   @Column('numeric', { precision: 5, scale: 1, nullable: true })
-  bb_pct: string;
+  bb_pct: number;
   @Column('numeric', { precision: 5, scale: 1, nullable: true })
-  ev: string;
+  ev: number;
   @Column('numeric', { precision: 5, scale: 1, nullable: true })
-  barrel_pct: string;
+  barrel_pct: number;
   @Column('numeric', { precision: 5, scale: 1, nullable: true })
-  hard_hit_pct: string;
+  hard_hit_pct: number;
   @Column('numeric', { precision: 5, scale: 1, nullable: true })
-  o_swing_pct: string;
+  o_swing_pct: number;
   @Column('numeric', { precision: 5, scale: 1, nullable: true })
-  z_swing_pct: string;
+  z_swing_pct: number;
 }
