@@ -38,7 +38,7 @@ export class BatterStats {
   k_pct: number;
   @Column('numeric', { precision: 5, scale: 3, nullable: true })
   bb_pct: number;
-  @Column('numeric', { precision: 5, scale: 3, nullable: true })
+  @Column('numeric', { precision: 5, scale: 1, nullable: true })
   ev: number;
   @Column('numeric', { precision: 5, scale: 3, nullable: true })
   barrel_pct: number;
