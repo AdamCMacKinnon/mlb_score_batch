@@ -382,14 +382,14 @@ export class DataService {
           const iso = data[i].ISO ?? null;
           const babip = data[i].BABIP ?? null;
 
-          const k_pct = data[i].K_PCT ?? null;
-          const bb_pct = data[i].BB_PCT ?? null;
+          const k_pct = data[i]['K%'] ?? null;
+          const bb_pct = data[i]['BB%'] ?? null;
 
           const ev = data[i].EV ?? null; // exit velocity
-          const barrel_pct = data[i].BARREL_PCT ?? null;
-          const hard_hit_pct = data[i].HARD_HIT_PCT ?? null;
-          const o_swing_pct = data[i].O_SWIPE_PCT ?? null;
-          const z_swing_pct = data[i].Z_SWIPE_PCT ?? null;
+          const barrel_pct = data[i]['Barrel%'] ?? null;
+          const hard_hit_pct = data[i]['HardHit%'] ?? null;
+          const o_swing_pct = data[i]['O-Swing%'] ?? null;
+          const z_swing_pct = data[i]['Z-Swing%'] ?? null;
 
           Logger.log(`Writing Batter Stats for FGID: ${fgId}`);
           await this.writeBatterStatsValues(
@@ -439,18 +439,18 @@ export class DataService {
     rbi: number,
     sb: number,
     cs: number,
-    avg: string,
-    obp: string,
-    slg: string,
-    iso: string,
-    babip: string,
-    k_pct: string,
-    bb_pct: string,
-    ev: string,
-    barrel_pct: string,
-    hard_hit_pct: string,
-    o_swing_pct: string,
-    z_swing_pct: string,
+    avg: number,
+    obp: number,
+    slg: number,
+    iso: number,
+    babip: number,
+    k_pct: number,
+    bb_pct: number,
+    ev: number,
+    barrel_pct: number,
+    hard_hit_pct: number,
+    o_swing_pct: number,
+    z_swing_pct: number,
   ): Promise<void> {
     try {
       await this.batterStatsRepository.upsert(
